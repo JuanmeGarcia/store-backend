@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { pool } from '../libs/postgres.pool.js';
 import { productService } from './products.service.js'
 let instanciate
 
@@ -9,6 +10,11 @@ export class CategoriesService {
         instanciate = this
         this.categories = []
         this.generate()
+
+        this.pool = pool
+        this.pool.on('error', (err)=> (
+            console.log(error)
+        ))
     }
 
     generate(){

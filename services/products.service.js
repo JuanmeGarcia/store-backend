@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import boom from '@hapi/boom'
+import { pool } from '../libs/index.js'
 
 
 let instanciate
@@ -12,6 +13,10 @@ class ProductsService {
         instanciate = this
         this.products = []
         this.generate()
+        this.pool = pool
+        this.pool.on('error', (err)=> (
+            console.log(error)
+        ))
     }
 
     generate() {
@@ -36,13 +41,10 @@ class ProductsService {
         return newProduct
     }
 
-    find() {
-        return new Promise((resolve, reject)=>{
-            setTimeout(() => {
-                resolve(this.products)
-            }, 1000)
-        })
-
+    async find() {
+        const query = 'SELECT * FROM tasks'
+        const response = await this.pool.query(query)
+        return response.rows
     }
 
     async findOne(id) {

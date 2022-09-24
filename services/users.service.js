@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import boom from '@hapi/boom';
+import { pool } from '../libs/index.js'
 
 let instanciate
 
@@ -10,6 +11,10 @@ class UsersService {
         instanciate = this
         this.users = []
         this.generate()
+        this.pool = pool
+        this.pool.on('error', (err)=> (
+            console.log(error)
+        ))
     }
 
     generate() {
@@ -38,12 +43,10 @@ class UsersService {
         return newUser
     }
 
-    find(limit, offset = 0) {
-        return new Promise((resolve) => {
-            setTimeout(()=>{
-                resolve(this.users.slice(offset, limit))
-            }, 500)
-        })
+    async find(limit, offset = 0) {
+        const query = 'SELECT * FROM tasks'
+        const response = await this.pool.query(query)
+        return response.rows
     }
 
     async findOne(id) {
