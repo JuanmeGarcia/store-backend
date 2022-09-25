@@ -1,12 +1,9 @@
-import { userService as service } from "../services/users.service.js";
+import { userService as service, userService } from "../services/users.service.js";
 
 
 export const getUsers = async (req, res, next) => {
-
     try {
-        const { limit, offset } = req.query
-
-        const users = await service.find(limit, offset)
+        const users = await service.find()
 
         if(!users) {
             return res.status(404).json({
@@ -14,17 +11,8 @@ export const getUsers = async (req, res, next) => {
                 message: 'No se han encontrado usuarios'
             })
         }
-
-        if(limit){
-            return res.status(200).json({
-                offset,
-                limit,
-                users,
-            })
-        }
-
-        res.status(400).json({
-            msg: 'No hay parametros'
+        return res.status(200).json({
+            users,
         })
 
     } catch (error) {
@@ -51,6 +39,20 @@ export const getUser = async (req, res, next) => {
             user
         })
 
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const createUser = async (req, res, next) => {
+    try {
+        const body = req.body
+
+        const newUser = await userService.createUser(body)
+
+        res.status(201).json({
+            newUser
+        })
     } catch (error) {
         next(error)
     }

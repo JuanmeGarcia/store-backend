@@ -1,3 +1,5 @@
+import { ValidationError } from "sequelize";
+
 
 export const logErrors = (error, req, res, next) => {
     console.error(error);
@@ -17,6 +19,17 @@ export const boomErrorHandler = (error, req, res, next) => {
         const { output } = error
         res.status(output.statusCode).json({
             message: output.payload
+        })
+    }
+
+    next(error)
+}
+
+export const sequelizeErrorHandler = (error, req, res, next) => {
+    if(error instanceof ValidationError){
+        res.status(409).json({
+            msg: error.name,
+            erorr: error.errors
         })
     }
 

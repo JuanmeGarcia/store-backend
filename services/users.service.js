@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker';
 import boom from '@hapi/boom';
-import { pool } from '../libs/index.js'
-
+import { sequelize } from '../libs/index.js'
 let instanciate
 
 class UsersService {
@@ -11,10 +10,6 @@ class UsersService {
         instanciate = this
         this.users = []
         this.generate()
-        this.pool = pool
-        this.pool.on('error', (err)=> (
-            console.log(error)
-        ))
     }
 
     generate() {
@@ -33,24 +28,19 @@ class UsersService {
     }
 
     async createUser(user) {
-        const newUser = {
-            id: faker.datatype.uuid().split('-')[0],
-            ...user
-        }
-
-        this.users.push(newUser)
-
+        const newUser = await sequelize.models.User.create(user)
         return newUser
     }
 
-    async find(limit, offset = 0) {
-        const query = 'SELECT * FROM tasks'
-        const response = await this.pool.query(query)
-        return response.rows
+    async find() {
+        const users = await sequelize
+            .models.User.findAll()
+        return users
     }
 
     async findOne(id) {
-        const user = this.users.find(user => user.id === id)
+        const user = await sequelize
+        .models.User.findByPk(id)
 
         if(!user) { throw boom.notFound('User not found') }
 
@@ -58,33 +48,18 @@ class UsersService {
     }
 
     async update(id, data) {
-        const index = this.users.findIndex(user => user.id === id)
+        const user = await this.findOne(id)
 
-        if(index === -1){
-            throw boom.notFound('User not found')
-        }
-        const user = this.users[index]
-        this.users[index] = {
-            ...user,
-            ...data
-        }
+        const response = await user.update(data)
 
-        return this.users[index]
+        return response
     }
 
     async delete(id) {
-        const index = this.users.findIndex(user => user.id === id)
+        const user = await this.findOne(id)
 
-        if(index === -1) {
-            throw boom.notFound('User not found')
-        }
-
-        this.users.splice(index, 1)
-
-        return {
-            id,
-            status: 'success',
-        }
+        await user.destroy()
+        return { id }
     }
 }
 

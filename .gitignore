@@ -106,3 +106,6 @@ dist
 postgres_data
 postgres_data/
 postgres_data/*
+mysql_data
+mysql_data/
+mysql_data/*
